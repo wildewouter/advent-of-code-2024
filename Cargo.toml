@@ -1,0 +1,4 @@
+[workspace]
+members = ["packages/*"]
+default-members = ["packages/day-*"]
+resolver = "2"
