@@ -7,43 +7,36 @@ fn main() {
 }
 
 fn part_one(input: &[Vec<isize>]) -> usize {
-    input
-        .iter()
-        .filter(|s| is_valid(s))
-        .count()
+    input.iter().filter(|s| is_valid(s)).count()
 }
 
 fn part_two(input: &[Vec<isize>]) -> usize {
     input
         .iter()
         .filter(|s| {
-            let mut permutations = vec![(*s).clone()];
-            
-            for i in 0..s.len() {
-                let mut next = (*s).clone();
-                next.remove(i);
-                
-                permutations.push(next);
-            }
-            
-            permutations.iter().any(|v| is_valid(v))
+            let report = *s;
+            (0..report.len()).any(|index| {
+                let (left, right) = report.split_at(index);
+                let permutation = left.iter().chain(&right[1..]).copied().collect::<Vec<_>>();
+                is_valid(&permutation)
+            }) || is_valid(report)
         })
         .count()
 }
 
 fn is_valid(s: &[isize]) -> bool {
-    let diffs: Vec<isize> = s.windows(2).map(|a| a[0] - a[1]).collect();
+    let mut asc = true;
+    let mut desc = true;
 
-    let is_ascending = diffs.iter().filter(|v| **v > 0).count() == diffs.len();
-    let is_descending = diffs.iter().filter(|v| **v < 0).count() == diffs.len();
-
-    let differs_not_too_much = diffs
-        .iter()
-        .filter(|v| v.abs() >= 1 && v.abs() <= 3)
-        .count()
-        == diffs.len();
-
-    (is_ascending || is_descending) && differs_not_too_much
+    s.windows(2).all(|w| {
+        let diff = w[0] - w[1];
+        if diff.abs() < 1 || diff.abs() > 3 {
+            return false;
+        }
+        asc &= diff <= 0;
+        desc &= diff >= 0;
+        true
+    }) && (asc || desc)
 }
 
 fn parse(input: &str) -> Vec<Vec<isize>> {
@@ -51,7 +44,7 @@ fn parse(input: &str) -> Vec<Vec<isize>> {
         .lines()
         .map(|l| {
             l.split_whitespace()
-                .map(|c| c.parse::<isize>().unwrap())
+                .filter_map(|c| c.parse().ok())
                 .collect()
         })
         .collect()
