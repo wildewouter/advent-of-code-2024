@@ -5,7 +5,7 @@ fn main() {
 
     let grid = create_grid(input);
 
-    println!("Day three");
+    println!("Day four");
     println!("Part one: {}", &part_one(&grid));
     println!("Part two: {}", &part_two(&grid));
 }
