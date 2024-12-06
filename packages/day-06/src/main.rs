@@ -56,15 +56,7 @@ fn walk(grid: &HashMap<(isize, isize), char>) -> (HashSet<(isize, isize)>, bool)
 
         position = grid.get(&next_p).map(|&c| {
             match c {
-                '#' => {
-                    let new_direction = get_next_direction(&direction);
-                    let next = get_next_coord(&new_direction, (&x, &y));
-
-                    match grid.get(&next) {
-                        Some('#') => ((x, y), get_next_direction(&new_direction)),
-                        _ => (next, new_direction),
-                    }
-                }
+                '#' => ((x, y), get_next_direction(&direction)),
                 _ => (next_p, direction),
             }
         });
