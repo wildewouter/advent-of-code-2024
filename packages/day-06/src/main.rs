@@ -45,23 +45,28 @@ fn walk(grid: &HashMap<(isize, isize), char>) -> (HashSet<(isize, isize)>, bool)
     let mut visited: HashSet<((isize, isize), char)> = HashSet::new();
 
     while let Some(((x, y), direction)) = position {
-        if visited.contains(&((x, y), direction)) {
+        if !visited.insert(((x, y), direction)) {
             return (
                 visited.into_iter().map(|(p, _)| p).collect::<HashSet<_>>(),
                 true,
             );
         }
 
-        visited.insert(((x, y), direction));
-
         let next_p = get_next_coord(&direction, (&x, &y));
 
-        position = grid.get(&next_p).map(|&c| match c {
-            '#' => {
-                let new_direction = get_next_direction(&direction);
-                (get_next_coord(&new_direction, (&x, &y)), new_direction)
+        position = grid.get(&next_p).map(|&c| {
+            match c {
+                '#' => {
+                    let new_direction = get_next_direction(&direction);
+                    let next = get_next_coord(&new_direction, (&x, &y));
+
+                    match grid.get(&next) {
+                        Some('#') => ((x, y), get_next_direction(&new_direction)),
+                        _ => (next, new_direction),
+                    }
+                }
+                _ => (next_p, direction),
             }
-            _ => (next_p, direction),
         });
     }
 
