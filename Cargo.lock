@@ -49,6 +49,13 @@ name = "day-one"
 version = "0.1.0"
 
 [[package]]
+name = "day-se7en"
+version = "0.1.0"
+dependencies = [
+ "rayon",
+]
+
+[[package]]
 name = "day-six"
 version = "0.1.0"
 dependencies = [
