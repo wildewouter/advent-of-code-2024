@@ -1,3 +1,5 @@
+use std::ops::Add;
+use itertools::{Itertools};
 use rayon::prelude::*;
 
 fn main() {
@@ -5,7 +7,7 @@ fn main() {
 
     println!("Day se7en");
     println!("Part one: {}", &part_one(input));
-    // println!("Part two: {}", &part_two(input));
+    println!("Part two: {}", &part_two(input));
 }
 
 fn part_one(input: &str) -> isize {
@@ -36,6 +38,34 @@ fn part_one(input: &str) -> isize {
         .sum()
 }
 
+fn part_two(input: &str) -> isize {
+    input
+        .par_lines()
+        .filter_map(|l| {
+            let split = l.split(": ").collect::<Vec<&str>>();
+
+            let answer = split[0].parse::<isize>().unwrap();
+            let calc_input = split[1]
+                .split(" ")
+                .filter_map(|v| v.parse::<isize>().ok())
+                .collect::<Vec<isize>>();
+
+            let length = calc_input.len();
+
+            let permutations: Vec<Vec<char>> = (0..length-1)
+                .map(|_| vec!['+', 'x', '|'].into_iter())
+                .multi_cartesian_product()
+                .collect();
+
+            let result = permutations.iter().find(|permutation| {
+                try_permutation_char_vec(&calc_input, &permutation) == answer
+            });
+
+            result.map(|_| answer)
+        })
+        .sum()
+}
+
 fn try_permutation(calc: &[isize], permutation: &str) -> isize {
     calc.iter()
         .skip(1)
@@ -51,13 +81,23 @@ fn try_permutation(calc: &[isize], permutation: &str) -> isize {
         })
 }
 
-// fn part_two(_input: &str) -> usize {
-//     0
-// }
+fn try_permutation_char_vec(calc: &[isize], permutation: &[char]) -> isize {
+    calc.iter()
+        .skip(1)
+        .enumerate()
+        .fold(*calc.first().unwrap(), |left, (index, right)| {
+            match permutation.get(index) {
+                Some('x') => left * right,
+                Some('+') => left + right,
+                Some('|') => left.to_string().add(right.to_string().as_str()).parse::<isize>().unwrap(),
+                _ => panic!("AAAAAAAAAAAAH"),
+            }
+        })
+}
 
 #[cfg(test)]
 mod tests {
-    use crate::{part_one};
+    use crate::{part_one, part_two};
 
     const INPUT: &str = r#"190: 10 19
 3267: 81 40 27
@@ -75,8 +115,8 @@ mod tests {
         assert_eq!(part_one(INPUT), 3749);
     }
 
-    // #[test]
-    // fn test_two() {
-    //     assert_eq!(part_two(INPUT), 0);
-    // }
+    #[test]
+    fn test_two() {
+        assert_eq!(part_two(INPUT), 11387);
+    }
 }
